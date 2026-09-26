@@ -6,12 +6,22 @@ from typing import Dict, Any, Optional
 from pathlib import Path
 import logging
 
-from app.core.config import settings
-from app.services.drafter import DRAFT_TEMPLATES, generate_legal_draft, export_draft_to_pdf
-from app.services.statutes import answer_legal_query, STATUTORY_TOPICS
-from app.services.voice_nlp import process_voice_nlp
-from app.services.translator import translate_legal_text
-from app.services.document_analysis import analyze_document
+try:
+    # When run as "backend.app.main" (Vercel / installed package)
+    from backend.app.core.config import settings
+    from backend.app.services.drafter import DRAFT_TEMPLATES, generate_legal_draft, export_draft_to_pdf
+    from backend.app.services.statutes import answer_legal_query, STATUTORY_TOPICS
+    from backend.app.services.voice_nlp import process_voice_nlp
+    from backend.app.services.translator import translate_legal_text
+    from backend.app.services.document_analysis import analyze_document
+except ImportError:
+    # When run locally as "app.main" (uvicorn app.main:app)
+    from app.core.config import settings  # type: ignore
+    from app.services.drafter import DRAFT_TEMPLATES, generate_legal_draft, export_draft_to_pdf  # type: ignore
+    from app.services.statutes import answer_legal_query, STATUTORY_TOPICS  # type: ignore
+    from app.services.voice_nlp import process_voice_nlp  # type: ignore
+    from app.services.translator import translate_legal_text  # type: ignore
+    from app.services.document_analysis import analyze_document  # type: ignore
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
