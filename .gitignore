@@ -53,3 +53,5 @@ chroma_db/
 Thumbs.db
 .vscode/
 .idea/
+
+.vercel

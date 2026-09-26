@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Response, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from typing import Dict, Any, Optional
 from pathlib import Path
 import logging
@@ -61,7 +61,8 @@ class DraftRequest(BaseModel):
     template_id: str
     fields: Dict[str, Any]
 
-    @validator("template_id")
+    @field_validator("template_id")
+    @classmethod
     def template_id_must_not_be_empty(cls, v: str) -> str:
         if not v.strip():
             raise ValueError("template_id must not be empty")
@@ -71,7 +72,8 @@ class DraftRequest(BaseModel):
 class LegalQARequest(BaseModel):
     query: str
 
-    @validator("query")
+    @field_validator("query")
+    @classmethod
     def query_must_not_be_empty(cls, v: str) -> str:
         if not v.strip():
             raise ValueError("query must not be empty")
@@ -88,7 +90,8 @@ class PDFExportRequest(BaseModel):
 class VoiceRequest(BaseModel):
     transcript: str
 
-    @validator("transcript")
+    @field_validator("transcript")
+    @classmethod
     def transcript_must_not_be_empty(cls, v: str) -> str:
         if not v.strip():
             raise ValueError("transcript must not be empty")
@@ -99,13 +102,15 @@ class TranslateRequest(BaseModel):
     text: str
     target_language: str
 
-    @validator("text")
+    @field_validator("text")
+    @classmethod
     def text_must_not_be_empty(cls, v: str) -> str:
         if not v.strip():
             raise ValueError("text must not be empty")
         return v
 
-    @validator("target_language")
+    @field_validator("target_language")
+    @classmethod
     def lang_must_be_valid(cls, v: str) -> str:
         allowed = {"en", "hi", "te", "ta", "ml", "kn", "bn", "mr", "gu", "pa"}
         if v not in allowed:
