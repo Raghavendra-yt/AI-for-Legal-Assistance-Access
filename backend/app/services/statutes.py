@@ -66,8 +66,17 @@ STATUTORY_TOPICS = {
 }
 
 
+_qa_cache: Dict[str, Dict[str, Any]] = {}
+
 def answer_legal_query(question: str) -> Dict[str, Any]:
-    """Provide grounded Indian legal guidance using Gemini or knowledge base."""
+    """Provide grounded Indian legal guidance using Gemini or knowledge base with memory caching."""
+    norm_q = question.strip().lower()
+    if norm_q in _qa_cache:
+        cached = _qa_cache[norm_q].copy()
+        cached["question"] = question
+        cached["cached"] = True
+        return cached
+
     is_gemini_active = bool(settings.GEMINI_API_KEY and not settings.GEMINI_API_KEY.startswith("your_"))
 
     if is_gemini_active:
@@ -140,9 +149,11 @@ Instructions:
 
 *Disclaimer: This information is for educational legal literacy under Indian law and does not constitute formal attorney counsel.*
 """
-    return {
+    result = {
         "question": question,
         "answer": answer_text,
         "engine": "Indian Statutory Knowledge Base (Add GEMINI_API_KEY for dynamic AI guidance)",
         "jurisdiction": "India"
     }
+    _qa_cache[norm_q] = result
+    return result

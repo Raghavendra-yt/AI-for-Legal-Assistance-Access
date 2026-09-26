@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { VoicePoweredOrb } from "@/components/ui/voice-powered-orb";
-import { LiquidMetalButton } from "@/components/ui/liquid-metal-button";
 import { ProgressiveFluxLoader } from "@/components/ui/progressive-flux-loader";
 import { PromptInputBox } from "@/components/ui/ai-prompt-box";
 import { useLanguage } from "@/context/LanguageContext";
@@ -616,23 +614,23 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onAutoFillToDraf
                 Speak your Legal Dispute
               </h3>
               <p className="text-xs text-gray-400 max-w-sm">
-                The 3D Neural Orb is actively listening to your microphone. Speak naturally.
+                Microphone is active. Speak clearly about your legal issue.
               </p>
             </div>
 
-            {/* 3D Voice-Powered WebGL Orb Animation */}
-            <div className="w-64 h-64 relative rounded-full flex items-center justify-center p-2 bg-[#16171A] border border-[#333333] shadow-2xl overflow-hidden">
-              <VoicePoweredOrb
-                className="w-full h-full"
-                hue={210}
-                enableVoiceControl={true}
-                voiceSensitivity={1.4}
-                maxRotationSpeed={1.8}
-                maxHoverIntensity={0.6}
-                onVoiceDetected={(detected) => setVoiceDetected(detected)}
-              />
-              {voiceDetected && (
-                <div className="absolute inset-0 rounded-full border-2 border-emerald-500/40 pointer-events-none animate-pulse" />
+            {/* High-Performance Voice Ripple Visualizer */}
+            <div className="w-56 h-56 relative rounded-full flex items-center justify-center p-4 bg-[#16171A] border border-[#333333] shadow-2xl overflow-hidden" aria-label="Microphone activity indicator">
+              <div className={`w-36 h-36 rounded-full flex items-center justify-center transition-all duration-300 ${voiceDetected || isRecording ? "bg-emerald-500/20 scale-105 shadow-lg shadow-emerald-500/30" : "bg-blue-500/10"}`}>
+                <div className={`w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 ${isRecording ? "bg-emerald-500 text-black shadow-lg shadow-emerald-500/50" : "bg-[#2E3033] text-gray-300"}`}>
+                  {isRecording ? (
+                    <Mic className="w-12 h-12 animate-pulse" aria-hidden="true" />
+                  ) : (
+                    <MicOff className="w-12 h-12 text-gray-500" aria-hidden="true" />
+                  )}
+                </div>
+              </div>
+              {(voiceDetected || isRecording) && (
+                <div className="absolute inset-0 rounded-full border-2 border-emerald-400/40 pointer-events-none animate-ping" />
               )}
             </div>
 
@@ -687,11 +685,14 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onAutoFillToDraf
               >
                 Cancel
               </Button>
-              <LiquidMetalButton
-                label="Complete & Send Dispute"
-                customWidth={240}
+              <Button
+                type="button"
                 onClick={handleStopAndSubmitVoice}
-              />
+                className="h-[46px] px-8 rounded-full text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-black shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-2 shrink-0"
+              >
+                <Check className="w-4 h-4" aria-hidden="true" />
+                <span>Complete & Send Dispute</span>
+              </Button>
             </div>
           </div>
         </div>

@@ -1,5 +1,4 @@
 import React, { Suspense, lazy, useState, useEffect, useCallback, useMemo } from "react";
-import { LiquidMetalButton } from "@/components/ui/liquid-metal-button";
 import { Button } from "@/components/ui/button";
 import { FileText, Compass, BookOpen, Sparkles, Printer, Copy, Download, RotateCcw, ChevronRight } from "lucide-react";
 import { LanguageSelector } from "@/components/LanguageSelector";
@@ -374,11 +373,14 @@ export function App() {
         <div className="flex items-center gap-3">
           <LanguageSelector />
           <div className="h-6 w-px bg-[#333333] hidden sm:block" aria-hidden="true" />
-          <LiquidMetalButton
-            label={t.topVoiceBtn}
+          <Button
             onClick={() => setActiveTab("voice")}
-            aria-label="Go to Nyaya Vani voice assistant"
-          />
+            aria-label="Go to voice assistant"
+            className="rounded-full bg-emerald-600 hover:bg-emerald-500 text-black font-semibold text-xs px-4 py-2 shadow-lg shadow-emerald-600/20 transition flex items-center gap-1.5"
+          >
+            <span aria-hidden="true">🎙️</span>
+            <span>{t.topVoiceBtn}</span>
+          </Button>
         </div>
       </header>
 

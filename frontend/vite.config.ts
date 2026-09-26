@@ -19,6 +19,21 @@ export default defineConfig({
       exclude: ["node_modules/", "src/test/"],
     },
   },
+  build: {
+    target: "es2020",
+    minify: "esbuild",
+    cssCodeSplit: true,
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "vendor-react": ["react", "react-dom"],
+          "vendor-motion": ["framer-motion"],
+          "vendor-icons": ["lucide-react"],
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     proxy: {

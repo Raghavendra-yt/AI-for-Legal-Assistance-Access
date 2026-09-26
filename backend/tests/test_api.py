@@ -343,6 +343,45 @@ class TestSecurityHeaders:
         resp = client.get("/api/health")
         assert "referrer-policy" in resp.headers
 
+    def test_content_security_policy_present(self):
+        resp = client.get("/api/health")
+        assert "content-security-policy" in resp.headers
+        assert "default-src 'self'" in resp.headers["content-security-policy"]
+
+    def test_strict_transport_security_present(self):
+        resp = client.get("/api/health")
+        assert "strict-transport-security" in resp.headers
+
+    def test_x_xss_protection_present(self):
+        resp = client.get("/api/health")
+        assert resp.headers.get("x-xss-protection") == "1; mode=block"
+
+    def test_permissions_policy_present(self):
+        resp = client.get("/api/health")
+        assert "permissions-policy" in resp.headers
+
+    def test_rate_limit_headers_on_api_call(self):
+        resp = client.get("/api/draft/templates")
+        assert resp.status_code == 200
+        assert "x-ratelimit-limit" in resp.headers
+        assert "x-ratelimit-remaining" in resp.headers
+
+    def test_qa_caching_behavior(self):
+        query = "What happens if a cheque bounces in India?"
+        resp1 = client.post("/api/legal-qa", json={"query": query})
+        assert resp1.status_code == 200
+        resp2 = client.post("/api/legal-qa", json={"query": query})
+        assert resp2.status_code == 200
+        assert resp2.json().get("cached") is True
+
+    def test_translation_caching_behavior(self):
+        text = "This legal notice is served under Section 138."
+        resp1 = client.post("/api/translate", json={"text": text, "target_language": "hi"})
+        assert resp1.status_code == 200
+        resp2 = client.post("/api/translate", json={"text": text, "target_language": "hi"})
+        assert resp2.status_code == 200
+        assert resp2.json().get("cached") is True
+
 
 # ─── Input Validation Edge Cases ─────────────────────────────────────────────
 

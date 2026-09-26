@@ -22,21 +22,31 @@ LANGUAGE_NAMES = {
     "en": "English"
 }
 
+_translation_cache: Dict[tuple, Dict[str, Any]] = {}
+
 def translate_legal_text(text: str, target_lang: str) -> Dict[str, Any]:
     """
     Translates legal notice, advice, or citizen query into target Indian language
-    maintaining legal terminology and formal court phrasing.
+    maintaining legal terminology and formal court phrasing with caching.
     """
+    cache_key = (text.strip(), target_lang.strip().lower())
+    if cache_key in _translation_cache:
+        cached = _translation_cache[cache_key].copy()
+        cached["cached"] = True
+        return cached
+
     lang_name = LANGUAGE_NAMES.get(target_lang, target_lang)
 
     is_gemini_active = bool(settings.GEMINI_API_KEY and not settings.GEMINI_API_KEY.startswith("your_"))
     if not is_gemini_active:
-        return {
+        res = {
             "translated_text": text,
             "target_language": target_lang,
             "target_language_name": lang_name,
             "note": "AI key required for deep text translation"
         }
+        _translation_cache[cache_key] = res
+        return res
 
     system_prompt = f"""You are an expert bilingual Indian advocate and official legal translator.
 Translate the following legal notice, citizen query, or legal guidance accurately into {lang_name}.
@@ -64,19 +74,23 @@ CRITICAL RULES:
                 translated = response.text.strip()
 
             if translated:
-                return {
+                res = {
                     "translated_text": translated,
                     "target_language": target_lang,
                     "target_language_name": lang_name,
                     "engine": f"Gemini ({model_name})"
                 }
+                _translation_cache[cache_key] = res
+                return res
         except Exception as e:
             print(f"Translation error with {model_name}: {e}")
             continue
 
-    return {
+    fallback_res = {
         "translated_text": text,
         "target_language": target_lang,
         "target_language_name": lang_name,
         "note": "Translation fallback"
     }
+    _translation_cache[cache_key] = fallback_res
+    return fallback_res

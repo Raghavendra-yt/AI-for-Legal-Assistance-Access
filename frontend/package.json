@@ -12,7 +12,6 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@paper-design/shaders": "^0.0.81",
     "@radix-ui/react-dialog": "^1.1.23",
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.2.16",
@@ -21,11 +20,9 @@
     "framer-motion": "^13.4.4",
     "lucide-react": "^0.453.0",
     "next-themes": "^0.4.6",
-    "ogl": "^1.0.11",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "tailwind-merge": "^2.5.4",
-    "three": "^0.186.1"
+    "tailwind-merge": "^2.5.4"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^7.0.1",
@@ -34,7 +31,6 @@
     "@types/node": "^22.7.5",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
-    "@types/three": "^0.186.0",
     "@vitejs/plugin-react": "^4.3.2",
     "@vitest/coverage-v8": "^1.6.0",
     "autoprefixer": "^10.4.20",

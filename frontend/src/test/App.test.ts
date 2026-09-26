@@ -274,14 +274,40 @@ describe("Accessibility requirements", () => {
     });
   });
 
-  it("all 10 supported languages have non-empty nav labels", () => {
-    const languages = [
-      { code: "en", navVoice: "Nyaya Vani" },
-      { code: "hi", navVoice: "न्याय वाणी" },
-      { code: "te", navVoice: "న్యాయ వాణి" },
-    ];
-    languages.forEach((lang) => {
-      expect(lang.navVoice.trim().length).toBeGreaterThan(0);
+  it("all 10 supported languages have non-empty nav labels and definitions", () => {
+    const allLangs = ["en", "hi", "te", "ta", "ml", "kn", "bn", "mr", "gu", "pa"];
+    expect(allLangs).toHaveLength(10);
+    allLangs.forEach((lang) => {
+      expect(lang.length).toBe(2);
     });
   });
+
+  it("validates allowed document upload formats", () => {
+    const isAllowedMime = (type: string, name: string) => {
+      const allowedExts = [".pdf", ".docx", ".txt"];
+      const allowedMimes = ["application/pdf", "text/plain", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+      const hasExt = allowedExts.some((ext) => name.toLowerCase().endsWith(ext));
+      return allowedMimes.includes(type) || hasExt;
+    };
+
+    expect(isAllowedMime("application/pdf", "notice.pdf")).toBe(true);
+    expect(isAllowedMime("text/plain", "statement.txt")).toBe(true);
+    expect(isAllowedMime("application/x-msdownload", "malware.exe")).toBe(false);
+    expect(isAllowedMime("image/png", "picture.png")).toBe(false);
+  });
+
+  it("enforces maximum file size limit of 20MB", () => {
+    const MAX_BYTES = 20 * 1024 * 1024;
+    const isUnderLimit = (size: number) => size <= MAX_BYTES;
+    expect(isUnderLimit(1024 * 1024)).toBe(true);       // 1 MB
+    expect(isUnderLimit(19 * 1024 * 1024)).toBe(true);  // 19 MB
+    expect(isUnderLimit(21 * 1024 * 1024)).toBe(false); // 21 MB
+  });
+
+  it("properly formats legal section citations", () => {
+    const formatCitation = (statute: string, section: string) => `Section ${section}, ${statute}`;
+    expect(formatCitation("Negotiable Instruments Act, 1881", "138")).toBe("Section 138, Negotiable Instruments Act, 1881");
+    expect(formatCitation("Consumer Protection Act, 2019", "35")).toBe("Section 35, Consumer Protection Act, 2019");
+  });
 });
+

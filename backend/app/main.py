@@ -42,9 +42,47 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization", "Accept"],
 )
 
-# Security response headers middleware
+# Compression Middleware for high efficiency / bandwidth reduction
+from fastapi.middleware.gzip import GZipMiddleware
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+# Security response headers & Rate Limiting middleware
+import time
+from collections import defaultdict
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request as StarletteRequest
+from starlette.responses import JSONResponse
+
+client_request_history = defaultdict(list)
+RATE_LIMIT_WINDOW = 60.0  # seconds
+MAX_REQUESTS_PER_WINDOW = 120
+
+class RateLimitMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: StarletteRequest, call_next):
+        path = request.url.path
+        if path in ("/api/health", "/docs", "/redoc", "/openapi.json") or path.startswith("/assets"):
+            return await call_next(request)
+        
+        client_ip = request.client.host if request.client else "127.0.0.1"
+        now = time.time()
+        # Clean timestamps older than window
+        client_request_history[client_ip] = [t for t in client_request_history[client_ip] if now - t < RATE_LIMIT_WINDOW]
+        
+        if len(client_request_history[client_ip]) >= MAX_REQUESTS_PER_WINDOW:
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "Too many requests. Please wait a minute before retrying."},
+                headers={"Retry-After": "60"}
+            )
+        
+        client_request_history[client_ip].append(now)
+        response = await call_next(request)
+        response.headers["X-RateLimit-Limit"] = str(MAX_REQUESTS_PER_WINDOW)
+        response.headers["X-RateLimit-Remaining"] = str(max(0, MAX_REQUESTS_PER_WINDOW - len(client_request_history[client_ip])))
+        return response
+
+app.add_middleware(RateLimitMiddleware)
+
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: StarletteRequest, call_next):
@@ -52,6 +90,18 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline'; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            "font-src 'self' https://fonts.gstatic.com data:; "
+            "img-src 'self' data: https:; "
+            "connect-src 'self' https:; "
+            "frame-ancestors 'none';"
+        )
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(self), geolocation=(), payment=()"
         return response
 
 app.add_middleware(SecurityHeadersMiddleware)
