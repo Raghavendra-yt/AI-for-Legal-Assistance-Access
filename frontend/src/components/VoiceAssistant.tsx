@@ -48,6 +48,7 @@ interface VoiceAssistantProps {
 }
 
 export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onAutoFillToDrafting }) => {
+  const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
   const { t, languageInfo, language } = useLanguage();
 
   // Chat conversation state
@@ -233,14 +234,14 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onAutoFillToDraf
 
     try {
       // 1. Query Voice NLP pipeline for intent, entities & spoken advice
-      const nlpPromise = fetch("/api/voice/process", {
+      const nlpPromise = fetch(`${API_BASE}/api/voice/process`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ transcript: queryText }),
       }).then((res) => (res.ok ? res.json() : null)).catch(() => null);
 
       // 2. Query Legal QA engine for statutory guidance
-      const qaPromise = fetch("/api/legal-qa", {
+      const qaPromise = fetch(`${API_BASE}/api/legal-qa`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: queryText }),

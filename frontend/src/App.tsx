@@ -14,6 +14,8 @@ import { useLanguage } from "@/context/LanguageContext";
 
 export function App() {
   const { t } = useLanguage();
+  const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
+
   const [activeTab, setActiveTab] = useState<"voice" | "drafting" | "qa" | "statutes" | "demo">("voice");
   const [templates, setTemplates] = useState<any[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("legal_notice_money");
@@ -35,7 +37,7 @@ export function App() {
 
   // Fetch templates and statutes on load
   useEffect(() => {
-    fetch("/api/draft/templates")
+    fetch(`${API_BASE}/api/draft/templates`)
       .then((res) => res.json())
       .then((data) => {
         if (data.templates) {
@@ -45,7 +47,7 @@ export function App() {
       })
       .catch((err) => console.warn("Templates load error:", err));
 
-    fetch("/api/statutes/topics")
+    fetch(`${API_BASE}/api/statutes/topics`)
       .then((res) => res.json())
       .then((data) => {
         if (data.topics) setStatutoryTopics(data.topics);
@@ -82,7 +84,7 @@ export function App() {
     }, 280);
 
     try {
-      const res = await fetch("/api/draft/generate", {
+      const res = await fetch(`${API_BASE}/api/draft/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -109,7 +111,7 @@ export function App() {
   const handleDownloadPDF = async () => {
     if (!generatedDraft) return;
     try {
-      const res = await fetch("/api/draft/export-pdf", {
+      const res = await fetch(`${API_BASE}/api/draft/export-pdf`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -143,7 +145,7 @@ export function App() {
     }, 280);
 
     try {
-      const res = await fetch("/api/legal-qa", {
+      const res = await fetch(`${API_BASE}/api/legal-qa`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: queryText }),
@@ -171,7 +173,7 @@ export function App() {
     if (!generatedDraft?.draft_text) return;
     setIsTranslatingDraft(true);
     try {
-      const res = await fetch("/api/translate", {
+      const res = await fetch(`${API_BASE}/api/translate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -198,7 +200,7 @@ export function App() {
     if (!qaAnswer?.answer) return;
     setIsTranslatingQa(true);
     try {
-      const res = await fetch("/api/translate", {
+      const res = await fetch(`${API_BASE}/api/translate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

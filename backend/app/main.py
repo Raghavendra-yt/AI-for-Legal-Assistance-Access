@@ -221,15 +221,6 @@ async def analyze_document_endpoint(
 
 
 
-# Mount the frontend directory to serve the complete web UI at root http://localhost:8000/
-dist_path = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
-frontend_path = Path(__file__).resolve().parent.parent.parent / "frontend"
-static_dir = dist_path if dist_path.exists() else frontend_path
-
-if static_dir.exists():
-    app.mount("/", StaticFiles(directory=str(static_dir), html=True), name="frontend")
-
-
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("app.main:app", host="0.0.0.0", port=settings.PORT, reload=True)
